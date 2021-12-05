@@ -163,6 +163,11 @@ select distinct con.contact_first_name, con.contact_last_name, sess.session_cour
 
 
 -- find the teachers who are not giving any courses
+select * from teachers t left join sessions s on s.session_prof_ref = t.teacher_epita_email 
+left join courses c on s.session_course_ref = c.course_code 
+where s.session_course_ref is null ;
+
+-- this one is wrong
 select s.student_epita_email
 from students as s 
 where s.student_epita_email not in 
