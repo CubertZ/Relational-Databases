@@ -183,12 +183,16 @@ select * from students
 select * from grades
 select * from attendance
 
--- MORE QUESTIONS : 
+-- MORE QUESTIONS:
 
 --  1- Get all enrolled students for a specific period,program,year ?
 select * from populations p ;
-select * from students s ;
 select * from programs p ;
+select * from exams e ;
+select * from grades g ;
+select * from courses c ;
+select * from students s ;
+select * from contacts c;
 select c.contact_first_name ,c.contact_last_name ,s.* from students s
 left join contacts c on c.contact_email = s.student_contact_ref
 where s.student_population_year_ref = 2021 and s.student_population_code_ref = 'CS';
@@ -199,10 +203,6 @@ select * from students s where s.student_population_year_ref = 2021 and s.studen
 select count(1) from students s where s.student_population_year_ref = 2021 and s.student_population_code_ref = 'CS' ;
 
 -- 3- Get All defined exams for a course from grades table
-select * from exams e ;
-select * from grades g ;
-select * from courses c ;
-select * from students s ;
 select c.course_code , g.grade_exam_type_ref from grades g 
 left join courses c on g.grade_course_code_ref = c.course_code 
 left join exams e on e.exam_course_code = c.course_code where c.course_code = 'PG_PYTHON';
@@ -223,5 +223,56 @@ select c2.contact_first_name,c2.contact_last_name, s.student_epita_email , e.exa
 left join courses c on c.course_code = e.exam_course_code 
 left join grades g on g.grade_course_code_ref = c.course_code 
 left join students s on s.student_epita_email = g.grade_student_epita_email_ref
-left join contacts c2 on c2.contact_email = s.student_contact_ref where c.course_code = 'PG_PYTHON';
+left join contacts c2 on c2.contact_email = s.student_contact_ref where c.course_code = 'PG_PYTHON' and e.exam_type = 'Project';
+-- or 
+select g.grade_student_epita_email_ref, g.grade_course_code_ref, g.grade_score,
+rank() over(order by g.grade_score desc) student_rank
+from grades g
+where g.grade_course_code_ref = 'DT_RDBMS' and g.grade_exam_type_ref = 'Project';
+
+-- 7-Get students Ranks in all exams for a course
+select g.grade_student_epita_email_ref, g.grade_course_code_ref, g.grade_score, g.grade_exam_type_ref ,
+rank() over(order by g.grade_score desc) student_rank
+from grades g
+where g.grade_course_code_ref = 'DT_RDBMS'  ;
+
+-- 8-Get students Rank in all exams in all courses
+select g.grade_student_epita_email_ref, g.grade_course_code_ref, g.grade_score,
+rank() over(partition by g.grade_course_code_ref order by g.grade_score desc) student_rank
+from grades g ;
+-- or 
+select c.contact_first_name, c.contact_last_name , g.grade_course_code_ref, g.grade_score,
+rank() over(partition by g.grade_course_code_ref order by g.grade_score desc) student_rank
+from grades g left join students s on s.student_epita_email = g.grade_student_epita_email_ref 
+left join contacts c on c.contact_email = s.student_contact_ref ;
+
+-- 9-Get all courses for one program
+-- 10-Get courses in common between 2 programs
+-- 11-Get all programs following a certain course
+-- 12- get course with the biggest duration
+-- 13-get courses with the same duration
+-- 14-Get all sessions for a specific course
+-- 15-Get all session for a certain period
+-- 16-Get one student attendance sheet
+-- 17- Get one student summary of attendance
+-- 18-Get student with most absences
+select * from attendance a ;
+select c.contact_first_name, c.contact_last_name, count(a.attendance_presence) as Absences from attendance a 
+left join students s on s.student_epita_email = a.attendance_student_ref 
+left join contacts c on c.contact_email = s.student_contact_ref where a.attendance_presence = 0
+group by c.contact_first_name, c.contact_last_name 
+order by Absences desc
+limit 1;
+-- Hard questions (build the relations requiered)
+-- 1- Get all exams for a specific Course
+-- 2- Get all Grades for a specific Student
+-- 3- Get the final grades for a student on a specifique course or all courses
+-- 4-Get the students with the top 5 scores for specific course
+-- 5-Get the students with the top 5 scores for specific course per rank
+-- 6-Get the Class average for a course
+
+--bonuses:
+-- 1-Get a student full report of grades and attendances
+-- 2- -- Get a student full report of grades ,ranks per course  and attendances
+-- Those questions are from easy to super hard
 
