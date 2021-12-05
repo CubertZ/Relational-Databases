@@ -182,3 +182,46 @@ select * from contacts
 select * from students
 select * from grades
 select * from attendance
+
+-- MORE QUESTIONS : 
+
+--  1- Get all enrolled students for a specific period,program,year ?
+select * from populations p ;
+select * from students s ;
+select * from programs p ;
+select c.contact_first_name ,c.contact_last_name ,s.* from students s
+left join contacts c on c.contact_email = s.student_contact_ref
+where s.student_population_year_ref = 2021 and s.student_population_code_ref = 'CS';
+-- or
+select * from students s where s.student_population_year_ref = 2021 and s.student_population_code_ref = 'CS';
+
+-- 2- Get number of enrolled students for a specific period,program,year
+select count(1) from students s where s.student_population_year_ref = 2021 and s.student_population_code_ref = 'CS' ;
+
+-- 3- Get All defined exams for a course from grades table
+select * from exams e ;
+select * from grades g ;
+select * from courses c ;
+select * from students s ;
+select c.course_code , g.grade_exam_type_ref from grades g 
+left join courses c on g.grade_course_code_ref = c.course_code 
+left join exams e on e.exam_course_code = c.course_code where c.course_code = 'PG_PYTHON';
+
+-- 4-Get all grades for a student
+select c.contact_first_name , c.contact_last_name ,g.grade_score, g.grade_course_code_ref, g.grade_exam_type_ref  from grades g
+left join students s on s.student_epita_email = g.grade_student_epita_email_ref
+left join contacts c on c.contact_email = s.student_contact_ref where c.contact_first_name ='Viva';
+-- or
+select * from grades g where g.grade_student_epita_email_ref = 'simona.morasca@epita.fr'; 
+
+-- 5-Get all grades for a specific Exam
+select g.grade_student_epita_email_ref, e.exam_course_code, e.exam_type , g.grade_score from grades g
+left join exams e on e.exam_course_code = g.grade_course_code_ref where e.exam_course_code = 'PG_PYTHON';
+
+-- 6-Get students Ranks in an Exam for a course
+select c2.contact_first_name,c2.contact_last_name, s.student_epita_email , e.exam_course_code ,g.grade_score, rank() over (order by g.grade_score desc) rank_number from exams e 
+left join courses c on c.course_code = e.exam_course_code 
+left join grades g on g.grade_course_code_ref = c.course_code 
+left join students s on s.student_epita_email = g.grade_student_epita_email_ref
+left join contacts c2 on c2.contact_email = s.student_contact_ref where c.course_code = 'PG_PYTHON';
+
